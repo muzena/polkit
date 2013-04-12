@@ -125,7 +125,18 @@ PKG_CHECK_MODULES(GLIB, [gmodule-2.0 gio-2.0 >= 2.30.0])
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
 
-PKG_CHECK_MODULES(LIBJS, [mozjs185])
+AC_ARG_WITH(mozjs, AS_HELP_STRING([--with-mozjs=@<:@mozjs185/mozjs-17.0|auto@:>@],
+		                  [Specify version of Spidermonkey to use]),,
+            with_mozjs=auto)
+AS_IF([test x${with_mozjs} != xauto], [
+  PKG_CHECK_MODULES(LIBJS, ${with_mozjs})
+], [
+  PKG_CHECK_MODULES(LIBJS, [mozjs185], have_mozjs185=yes, have_mozjs185=no)
+  AS_IF([test x${have_mozjs185} = xno], [
+  PKG_CHECK_MODULES(LIBJS, [mozjs-17.0], have_mozjs17=yes,
+   [AC_MSG_ERROR([Could not find mozjs185 or mozjs-17.0; see http://ftp.mozilla.org/pub/mozilla.org/js/])])
+  ])
+])
 AC_SUBST(LIBJS_CFLAGS)
 AC_SUBST(LIBJS_LIBS)
 
